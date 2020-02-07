@@ -1,16 +1,10 @@
-import tuDien2.Controller2;
+import tuDien2.Controller_TD;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Collection;
+import java.io.IOException;
 import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class fromDich extends JFrame {
     private JTextArea txtDich;
@@ -24,37 +18,111 @@ public class fromDich extends JFrame {
 
     public fromDich() {
         add(jP_Phong);
-        setSize(700,500);
+        setSize(600, 600);
         setTitle("JohnToan");
         this.setLocationRelativeTo(null);
         this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
         //Tạo đối tượng Controller:
-        Controller2 controller2 =new Controller2();
-        HashMap<String, String> hashMapEnglist = new HashMap<>();
-
+        Controller_TD controller = new Controller_TD();
         //Tạo ra hashMap;
-        hashMapEnglist = controller2.readFile();
-
-        HashMap<String, String> finalHashMapEnglist = hashMapEnglist;
-
+        HashMap<String, String> hashMapEnglist = controller.readFile();
+        
+        
+        
         // Các Sự Kiện Kích Chuột:
         TiengVietButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 String english = txtDich.getText();
 
-                txtPDich.setText(translate(english,controller2, finalHashMapEnglist));
-
+                if (controller.seachEnglist_D(hashMapEnglist, english) == null) {
+                    if (controller.seachEnglist_GD(hashMapEnglist, english) == null) {
+                        txtPDich.setText("Chưa có từ này");
+                    } else {
+                        txtPDich.setText(controller.seachEnglist_GD(hashMapEnglist, english));
+                    }
+                } else {
+                    txtPDich.setText(controller.seachEnglist_D(hashMapEnglist, english));
+                }
+            }
+        });
+        AddButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String key = txtDich.getText();
+                String value = txtPDich.getText();
+                boolean ischeck_Key = controller.isCheck_Key(hashMapEnglist, key);
+                if (ischeck_Key == true) {
+                    controller.addEnglist(hashMapEnglist, key, value);
+                    try {
+                        controller.writeFile_GhiDe(hashMapEnglist);
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+                    }
+                    txtDich.setText("");
+                    txtPDich.setText("Thêm thành công");
+                } else {
+                    txtDich.setText("");
+                    txtPDich.setText("Key đã có trong File.");
+                }
+            }
+        });
+        EditButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String key = txtDich.getText();
+                String value = txtPDich.getText();
+                boolean ischeck_Key = controller.isCheck_Key(hashMapEnglist, key);
+                if (ischeck_Key == false) {
+                    controller.edit(hashMapEnglist, value, key);
+                    try {
+                        controller.writeFile_GhiDe(hashMapEnglist);
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+                    }
+                    txtDich.setText("");
+                    txtPDich.setText("sửa thành công");
+                } else {
+                    txtDich.setText("");
+                    txtPDich.setText("Key chưa có trong File.");
+                }
+            }
+        });
+        DeleteButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String key = txtDich.getText();
+                boolean ischeck_Key = controller.isCheck_Key(hashMapEnglist, key);
+                if (ischeck_Key == false) {
+                    controller.delete(hashMapEnglist, key);
+                    try {
+                        controller.writeFile_GhiDe(hashMapEnglist);
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+                    }
+                    txtDich.setText("");
+                    txtPDich.setText("xóa thành công");
+                } else {
+                    txtDich.setText("");
+                    txtPDich.setText("Key chưa có trong File.");
+                }
+            }
+        });
+        ClearButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                txtDich.setText("");
+                txtPDich.setText("");
             }
         });
     }
 
+    
+    
     public static void main(String[] args) {
         fromDich myFrom = new fromDich();
         myFrom.setVisible(true);
     }
-    public static String translate(String keyword, Controller2 controller2,HashMap<String, String> hashMap){
-        return controller2.display_SeachEnglish(hashMap,controller2.seachIntEnglist(hashMap,keyword));
-    }
+
 }
