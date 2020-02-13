@@ -102,6 +102,7 @@ public class Controller_Ass {
         Collections.sort(arrayList, new Comparator<SinhVien>() {
             @Override
             public int compare(SinhVien sv1, SinhVien sv2) {
+
                 return (sv1.getName_SV().compareTo(sv2.getName_SV()));
             }
         });
